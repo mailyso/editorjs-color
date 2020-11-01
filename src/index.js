@@ -296,6 +296,10 @@ class Marker {
     this.button.classList.toggle(this.iconClasses.active, !!termTag);
   }
 
+  clear() {
+    this.palletteHide(true);
+  }
+
   /**
    * Get Tool icon's SVG
    * @return {string}
