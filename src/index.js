@@ -1,7 +1,11 @@
 /**
  * Build styles
  */
-require('./index.css').toString();
+const {i18n} = require("./i18n/index");
+
+require('./index.css').toString();;
+
+
 
 const CSS_OBJ = Object.freeze({
   colors: {
@@ -73,6 +77,7 @@ class Marker {
       active: this.api.styles.inlineToolButtonActive
     };
     this.palletteHide = this.palletteHide.bind(this);
+    this.getPallette = this.getPallette.bind(this);
   }
   /**
    * Specifies Tool as Inline Toolbar Tool
@@ -112,13 +117,8 @@ class Marker {
         this.palletteHide(true);
       });
       Object.keys(CSS_OBJ.colors).forEach(key => {
-        const v = CSS_OBJ.colors[key];
-        const element = make("div", [v]);
-        element.addEventListener("click", e => {
-          e.preventDefault();
-          e.stopPropagation();
-          this.surround(undefined, v);
-        })
+        const className = CSS_OBJ.colors[key];
+        const element = this.getPallette(key, className);
         this.pallette.palletteWrapper.appendChild(element);
       });
       this.button.appendChild(this.pallette.palletteWrapper);
@@ -128,6 +128,27 @@ class Marker {
     }
 
     return this.button;
+  }
+
+  /**
+   *
+   * @param {string} name - name of color
+   * @param {string} backgroundClass - color className
+   * @returns {Element}
+   */
+  getPallette(name, backgroundClass) {
+    const element = make("div");
+    element.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.surround(undefined, backgroundClass);
+    });
+    const colorElement = make("div", ["cdx-marker-pallette-color"]);
+    const letterElement = make("div", [backgroundClass], {innerText: "가"});
+    colorElement.appendChild(letterElement);
+    const nameElement = make("div", ["cdx-marker-pallette-name"], {innerText: i18n(name)});
+    element.append(colorElement, nameElement);
+    return element;
   }
 
   /**
