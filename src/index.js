@@ -203,7 +203,13 @@ class Marker {
       if(wrapper) {
         // console.log(wrapper.className.split(" "));
         selectedClass = wrapper.className.split(" ")?.[0];
+        let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
+
+        if (termWrapper) {
+          this.unwrap(termWrapper);
+        }
       }
+      return;
     } else {
       let wrapper = this.api.selection.findParentTag(this.tag);
       if(wrapper) {
