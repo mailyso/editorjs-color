@@ -6,7 +6,6 @@ const {i18n} = require("./i18n/index");
 require('./index.css').toString();
 
 
-
 const CSS_OBJ = Object.freeze({
   colors: {
     default: 'cdx-marker',
@@ -103,6 +102,9 @@ class Marker {
     this.button.innerHTML = this.toolboxIcon;
     try {
       this.button.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         this.palletteHide(null);
       })
       this.pallette.palletteWrapper = make("div", [CSS_OBJ.hide, CSS_OBJ.pallette]);
@@ -167,7 +169,7 @@ class Marker {
   palletteHide(bool) {
     // console.log("palletteHide", bool);
     if(bool === null) {
-      this.palettte.open = !this.palettte.open;
+      this.pallette.open = !this.pallette.open;
       this.pallette.palletteWrapper.classList.toggle(CSS_OBJ.hide);
       return;
     }
