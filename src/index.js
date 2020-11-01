@@ -3,13 +3,14 @@
  */
 const {i18n} = require("./i18n/index");
 
-require('./index.css').toString();;
+require('./index.css').toString();
 
 
 
 const CSS_OBJ = Object.freeze({
   colors: {
     default: 'cdx-marker',
+    //  white
     blue: 'cdx-marker__blue',
     red: 'cdx-marker__red',
     green: 'cdx-marker__green',
@@ -100,22 +101,29 @@ class Marker {
     //  so I think you can't call static methods on first render or sth
     this.button.classList.add(this.iconClasses.base, CSS_OBJ.button);  //  really??>..
     this.button.innerHTML = this.toolboxIcon;
-    this.button.addEventListener('mouseenter', e => {
-      console.log("mouseEnter");
-      this.palletteHide(false);
-    });
     try {
       this.button.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        this.surround(this.api.selection.getCurrentRange(), CSS_OBJ.colors.default, true);
-        this.palletteHide(true);
+        this.palletteHide(null);
       })
       this.pallette.palletteWrapper = make("div", [CSS_OBJ.hide, CSS_OBJ.pallette]);
-      this.pallette.palletteWrapper.addEventListener("mouseleave", e => {
+
+      //  add remove pallette
+      //  ===================================
+      const element = make("div");
+      element.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.surround(undefined, null, true);
         this.palletteHide(true);
       });
+      const colorElement = make("div", ["cdx-marker-pallette-color"]);
+      const letterElement = make("div", undefined, {innerText: "가"});
+      colorElement.appendChild(letterElement);
+      const nameElement = make("div", ["cdx-marker-pallette-name"], {innerText: i18n("white")});
+      element.append(colorElement, nameElement);
+      this.pallette.palletteWrapper.appendChild(element);
+      //  ===================================
+
       Object.keys(CSS_OBJ.colors).forEach(key => {
         const className = CSS_OBJ.colors[key];
         const element = this.getPallette(key, className);
@@ -142,6 +150,7 @@ class Marker {
       e.preventDefault();
       e.stopPropagation();
       this.surround(undefined, backgroundClass);
+      this.palletteHide(true);
     });
     const colorElement = make("div", ["cdx-marker-pallette-color"]);
     const letterElement = make("div", [backgroundClass], {innerText: "가"});
@@ -153,10 +162,15 @@ class Marker {
 
   /**
    *
-   * @param {boolean} bool
+   * @param {any} bool
    */
   palletteHide(bool) {
     // console.log("palletteHide", bool);
+    if(bool === null) {
+      this.palettte.open = !this.palettte.open;
+      this.pallette.palletteWrapper.classList.toggle(CSS_OBJ.hide);
+      return;
+    }
     if (bool) {
       this.pallette.open = true;
       this.pallette.palletteWrapper.classList.add(CSS_OBJ.hide);
