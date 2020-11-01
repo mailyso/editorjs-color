@@ -188,6 +188,25 @@ class Marker {
         // console.log(wrapper.className.split(" "));
         selectedClass = wrapper.className.split(" ")?.[0];
       }
+    } else {
+      let wrapper = this.api.selection.findParentTag(this.tag);
+      if(wrapper) {
+        const curClass = wrapper.className.split(" ")?.[0];
+        if(curClass) {
+          this.unwrap(this.api.selection.findParentTag(this.tag, curClass))
+            .then(() => {
+              let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
+
+              if (termWrapper) {
+                this.unwrap(termWrapper);
+              } else {
+                //  reget range
+                this.wrap(this.api.selection.getCurrentRange(), selectedClass);
+              }
+            })
+          return;
+        }
+      }
     }
 
     let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
@@ -232,32 +251,36 @@ class Marker {
    * Unwrap term-tag
    *
    * @param {HTMLElement} termWrapper - term wrapper tag
+   * @returns {Promise} promise
    */
   unwrap(termWrapper) {
-    /**
-     * Expand selection to all term-tag
-     */
-    this.api.selection.expandToTag(termWrapper);
-    let sel = window.getSelection();
-    let range = sel.getRangeAt(0);
+    return new Promise((res, rej) => {
+      /**
+       * Expand selection to all term-tag
+       */
+      this.api.selection.expandToTag(termWrapper);
+      let sel = window.getSelection();
+      let range = sel.getRangeAt(0);
 
-    let unwrappedContent = range.extractContents();
+      let unwrappedContent = range.extractContents();
 
-    /**
-     * Remove empty term-tag
-     */
-    termWrapper.parentNode.removeChild(termWrapper);
+      /**
+       * Remove empty term-tag
+       */
+      termWrapper.parentNode.removeChild(termWrapper);
 
-    /**
-     * Insert extracted content
-     */
-    range.insertNode(unwrappedContent);
+      /**
+       * Insert extracted content
+       */
+      range.insertNode(unwrappedContent);
 
-    /**
-     * Restore selection
-     */
-    sel.removeAllRanges();
-    sel.addRange(range);
+      /**
+       * Restore selection
+       */
+      sel.removeAllRanges();
+      sel.addRange(range);
+      res("done");
+    })
   }
 
   /**
