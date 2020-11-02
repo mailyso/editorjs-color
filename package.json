@@ -10,7 +10,7 @@
   ],
   "description": "Marker Tool for Editor.js",
   "license": "MIT",
-  "repository": "https://github.com/editor-js/marker",
+  "repository": "https://github.com/mailyso/marker",
   "main": "./dist/bundle.js",
   "scripts": {
     "build": "webpack --mode production",
@@ -29,5 +29,6 @@
     "style-loader": "^0.21.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
-  }
+  },
+  "dependencies": {}
 }
