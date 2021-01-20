@@ -323,11 +323,11 @@ class TextColor {
    * @return {{span: {class: string[]}}}
    */
   static get sanitize() {
-    const sanitizer = {};
-    sanitizer[this.tag.toLowerCase()] = {
-      class: CSS_ARR,
+    return {
+      span: {
+        class: CSS_ARR
+      }
     };
-    return sanitizer;
   }
 }
 /**
