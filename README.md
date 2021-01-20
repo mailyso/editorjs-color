@@ -37,7 +37,6 @@ var editor = EditorJS({
     ...
     TextColor: {
       class: TextColor,
-      shortcut: 'CMD+SHIFT+M',
     }
   },
   
