@@ -11,7 +11,7 @@ TextColor Tool for color text-fragments for the [Editor.js](https://editorjs.io)
 Get the package
 
 ```shell
-npm i --save-dev editorjs-color
+yarn add https://github.com/mailyso/editorjs-color
 ```
 
 Include module at your application
