@@ -1,32 +1,38 @@
 /*=========colors=========*/
-.cdx-marker { /*default - yellow*/
-	background: rgb(251,243,219);
-  padding: 3px 0;
+.cdx-color { /*default - yellow*/
+	color: #374151;
 }
 
-.cdx-marker__red {
-  background: rgb(251,228,228);
-	padding: 3px 0;
+.cdx-color__grey {
+  color: rgba(55, 53, 47, 0.6);
 }
 
-.cdx-marker__green {
-	background: rgb(221,237,234);
-	padding: 3px 0;
+.cdx-color__yellow {
+  color: rgb(223, 171, 1);
 }
 
-.cdx-marker__blue {
-	background: rgb(221,235,241);
-	padding: 3px 0;
+.cdx-color__red {
+  color: rgb(224, 62, 62);
 }
 
-.cdx-marker__brown {
-	background: rgb(233,229,227);
-	padding: 3px 0;
+.cdx-color__green {
+	color: rgb(15, 123, 108);
 }
 
-.cdx-marker__purple {
-	background: rgb(234,228,242);
-	padding: 3px 0;
+.cdx-color__blue {
+	color: rgb(11, 110, 153);
+}
+
+.cdx-color__brown {
+	color: rgb(100, 71, 58);
+}
+
+.cdx-color__purple {
+	color: rgb(105, 64, 165);
+}
+
+.cdx-color__orange {
+  color: rgb(217, 115, 13)
 }
 
 /*=========colors=========*/
@@ -35,15 +41,15 @@
 
 
 /*========pallette=======*/
-.cdx-marker-button {
+.cdx-color-button {
 	position: relative;
 }
 
-.cdx-marker-hide {
+.cdx-color-hide {
 	display: none !important;
 }
 
-.cdx-marker-pallette {
+.cdx-color-pallette {
 	max-width: calc(100vw - 24px);
 
 	position: absolute;
@@ -64,7 +70,7 @@
 	padding: 6px 0;
 }
 
-.cdx-marker-pallette > div {
+.cdx-color-pallette > div {
 	min-width: 240px;
 	max-width: calc(100vw - 24px);
 	height: 28px;
@@ -78,18 +84,18 @@
 	transition: background 20ms ease-in 0s;
 }
 
-.cdx-marker-pallette > div:hover {
+.cdx-color-pallette > div:hover {
 	background: rgba(55, 53, 47, 0.08);
 }
 
-.cdx-marker-pallette > div > .cdx-marker-pallette-color {
+.cdx-color-pallette > div > .cdx-color-pallette-color {
 	margin-left: 14px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.cdx-marker-pallette > div > .cdx-marker-pallette-color > div {
+.cdx-color-pallette > div > .cdx-color-pallette-color > div {
 	width: 22px;
 	height: 22px;
 
@@ -101,11 +107,10 @@
 	border-radius: 3px;
 	font-weight: 500;
 	box-shadow: rgba(15, 15, 15, 0.1) 0 0 0 1px inset;
-	color: black !important;
 	padding: 0 !important;
 }
 
-.cdx-marker-pallette > div > .cdx-marker-pallette-name {
+.cdx-color-pallette > div > .cdx-color-pallette-name {
 	margin: 0 14px 0 8px;
 	white-space: nowrap;
 	text-overflow: ellipsis;

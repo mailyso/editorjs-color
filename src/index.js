@@ -8,30 +8,29 @@ require('./index.css').toString();
 
 const CSS_OBJ = Object.freeze({
   colors: {
-    default: 'cdx-marker',
-    //  white
-    blue: 'cdx-marker__blue',
-    red: 'cdx-marker__red',
-    green: 'cdx-marker__green',
-    brown: 'cdx-marker__brown',
-    purple: 'cdx-marker__purple',
+    yellow: 'cdx-color__yellow',
+    blue: 'cdx-color__blue',
+    orange: 'cdx-color__orange',
+    red: 'cdx-color__red',
+    green: 'cdx-color__green',
+    brown: 'cdx-color__brown',
+    purple: 'cdx-color__purple',
   },
-  hide: 'cdx-marker-hide',
-  pallette: 'cdx-marker-pallette',
-  button: 'cdx-marker-button',
+  hide: 'cdx-color-hide',
+  pallette: 'cdx-color-pallette',
+  button: 'cdx-color-button',
 });
 
 const CSS_ARR = Object.freeze(Object.keys(CSS_OBJ.colors).map(v => CSS_OBJ.colors[v]));
 
 
 /**
- * Marker Tool for the Editor.js
+ * TextColor Tool for the Editor.js
  *
  * Allows to wrap inline fragment and style it somehow.
  */
-class Marker {
+class TextColor {
 
-  //  f u I do this my way
   // /**
   //  * Class name for term-tag
   //  *
@@ -67,7 +66,7 @@ class Marker {
      *
      * @type {string}
      */
-    this.tag = 'MARK';
+    this.tag = 'SPAN';
 
     /**
      * CSS classes
@@ -111,19 +110,8 @@ class Marker {
 
       //  add remove pallette
       //  ===================================
-      const element = make("div");
-      element.addEventListener("click", e => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.surround(undefined, null, true);
-        this.palletteHide(true);
-      });
-      const colorElement = make("div", ["cdx-marker-pallette-color"]);
-      const letterElement = make("div", undefined, {innerText: "가"});
-      colorElement.appendChild(letterElement);
-      const nameElement = make("div", ["cdx-marker-pallette-name"], {innerText: i18n("white")});
-      element.append(colorElement, nameElement);
-      this.pallette.palletteWrapper.appendChild(element);
+      const remover = this.getPallette("white", null ,true);
+      this.pallette.palletteWrapper.appendChild(remover);
       //  ===================================
 
       Object.keys(CSS_OBJ.colors).forEach(key => {
@@ -154,10 +142,10 @@ class Marker {
       this.surround(undefined, backgroundClass);
       this.palletteHide(true);
     });
-    const colorElement = make("div", ["cdx-marker-pallette-color"]);
+    const colorElement = make("div", ["cdx-color-pallette-color"]);
     const letterElement = make("div", [backgroundClass], {innerText: "가"});
     colorElement.appendChild(letterElement);
-    const nameElement = make("div", ["cdx-marker-pallette-name"], {innerText: i18n(name)});
+    const nameElement = make("div", ["cdx-color-pallette-name"], {innerText: i18n(name)});
     element.append(colorElement, nameElement);
     return element;
   }
@@ -195,7 +183,7 @@ class Marker {
     if (!refinedRange) {
       return;
     }
-    let selectedClass = className ? className : CSS_OBJ.colors.default;
+    let selectedClass = className ? className : "cdx-color";
 
     //  if forceRemove is true ignore class
     if(forceRemove) {
@@ -250,9 +238,9 @@ class Marker {
     /**
      * Create a wrapper for highlighting
      */
-    let marker = document.createElement(this.tag);
+    const coloredText = document.createElement(this.tag);
 
-    marker.classList.add(selectedClass);
+    coloredText.classList.add(selectedClass);
 
     /**
      * SurroundContent throws an error if the Range splits a non-Text node with only one of its boundary points
@@ -260,13 +248,13 @@ class Marker {
      *
      * // range.surroundContents(span);
      */
-    marker.appendChild(range.extractContents());
-    range.insertNode(marker);
+    coloredText.appendChild(range.extractContents());
+    range.insertNode(coloredText);
 
     /**
      * Expand (add) selection to highlighted block
      */
-    this.api.selection.expandToTag(marker);
+    this.api.selection.expandToTag(coloredText);
   }
 
   /**
@@ -332,14 +320,14 @@ class Marker {
 
   /**
    * Sanitizer rule
-   * @return {{mark: {class: string[]}}}
+   * @return {{span: {class: string[]}}}
    */
   static get sanitize() {
-    return {
-      mark: {
-        class: CSS_ARR,
-      }
+    const sanitizer = {};
+    sanitizer[this.tag.toLowerCase()] = {
+      class: CSS_ARR,
     };
+    return sanitizer;
   }
 }
 /**
@@ -366,4 +354,4 @@ function make(tagName, classNames = null, attributes = {}) {
   return el;
 };
 
-module.exports = Marker;
+module.exports = TextColor;

@@ -1,10 +1,8 @@
 ![](https://badgen.net/badge/Editor.js/v2.0/blue)
 
-# Marker Tool
+# TextColor Tool
 
-Marker Tool for highlighting text-fragments for the [Editor.js](https://editorjs.io).
-
-![](assets/example.gif)
+TextColor Tool for color text-fragments for the [Editor.js](https://editorjs.io).
 
 ## Installation
 
@@ -13,31 +11,19 @@ Marker Tool for highlighting text-fragments for the [Editor.js](https://editorjs
 Get the package
 
 ```shell
-npm i --save-dev @editorjs/marker
+npm i --save-dev editorjs-color
 ```
 
 Include module at your application
 
 ```javascript
-const Marker = require('@editorjs/marker');
+const TextColor = require('editorjs-color');
 ```
 
 ### Download to your project's source dir
 
 1. Upload folder `dist` from repository
 2. Add `dist/bundle.js` file to your page.
-
-### Load from CDN
-
-You can load specific version of package from [jsDelivr CDN](https://www.jsdelivr.com/package/npm/@editorjs/marker).
-
-`https://cdn.jsdelivr.net/npm/@editorjs/marker@latest`
-
-Require this script on a page with Editor.js.
-
-```html
-<script src="..."></script>
-```
 
 ## Usage
 
@@ -49,8 +35,8 @@ var editor = EditorJS({
   
   tools: {
     ...
-    Marker: {
-      class: Marker,
+    TextColor: {
+      class: TextColor,
       shortcut: 'CMD+SHIFT+M',
     }
   },
@@ -65,13 +51,13 @@ This Tool has no config params
 
 ## Output data
 
-Marked text will be wrapped with a `mark` tag with an `cdx-marker` class.
+Colored text will be wrapped with a `span` tag with an `cdx-color` class.
 
 ```json
 {
     "type" : "text",
     "data" : {
-        "text" : "Create a directory for your module, enter it and run <mark class=\"cdx-marker\">npm init</mark> command."
+        "text" : "Create a directory for your module, enter it and run <span class=\"cdx-color__yellow\">npm init</span> command."
     }
 }
 ```
