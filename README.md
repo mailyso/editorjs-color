@@ -6,7 +6,7 @@ TextColor Tool for color text-fragments for the [Editor.js](https://editorjs.io)
 
 ## Installation
 
-### Install via NPM
+### Install via YARN
 
 Get the package
 
@@ -17,7 +17,7 @@ yarn add https://github.com/mailyso/editorjs-color
 Include module at your application
 
 ```javascript
-const TextColor = require('editorjs-color');
+import TextColor from "editorjs-color";
 ```
 
 ### Download to your project's source dir
