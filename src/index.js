@@ -318,6 +318,10 @@ class TextColor {
     return require('./../assets/icon.svg').default;
   }
 
+  get shortcut() {
+    return 'CMD+J';
+  }
+
   /**
    * Sanitizer rule
    * @return {{span: {class: string[]}}}
