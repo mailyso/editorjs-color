@@ -110,7 +110,7 @@ class TextColor {
 
       //  add remove pallette
       //  ===================================
-      const remover = this.getPallette("white", null ,true);
+      const remover = this.getPallette("white", null, true);
       this.pallette.palletteWrapper.appendChild(remover);
       //  ===================================
 
@@ -119,6 +119,10 @@ class TextColor {
         const element = this.getPallette(key, className);
         this.pallette.palletteWrapper.appendChild(element);
       });
+
+      // 커스텀 컬러 피커
+      // const colorPicker = this.getCustomPicker()
+      // this.pallette.palletteWrapper.appendChild(colorPicker);
       this.button.appendChild(this.pallette.palletteWrapper);
     } catch(ex) {
       console.log("<<<<<<<<<<<<<<<<<<<<<<<<exception while init pallette>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -134,12 +138,12 @@ class TextColor {
    * @param {string} backgroundClass - color className
    * @returns {Element}
    */
-  getPallette(name, backgroundClass) {
+  getPallette(name, backgroundClass, forceRemove = false) {
     const element = make("div");
     element.addEventListener("click", e => {
       e.preventDefault();
       e.stopPropagation();
-      this.surround(undefined, backgroundClass);
+      this.surround(undefined, backgroundClass, null, forceRemove);
       this.palletteHide(true);
     });
     const colorElement = make("div", ["cdx-color-pallette-color"]);
@@ -149,6 +153,24 @@ class TextColor {
     element.append(colorElement, nameElement);
     return element;
   }
+
+  // 작동 안함. 원인 찾아서 수정 필요.
+  // getCustomPicker() {
+  //   const element = make("div");
+  //   const colorPicker = make('input', ["cdx-color-picker"], {
+  //     type: "color",
+  //     value: "#000000"
+  //   })
+  //   colorPicker.addEventListener('blur', (e) => {
+  //     e.preventDefault();
+  //     e.stopPropagation();
+  //     this.surround(undefined, "cdx-color", e.target.value, false);
+  //     // this.palletteHide(true);
+  //   })
+  //
+  //   element.append(colorPicker);
+  //   return element
+  // }
 
   /**
    *
@@ -177,7 +199,7 @@ class TextColor {
    * @param {string} className - selected color
    * @param {boolean} forceRemove - force it off or on
    */
-  surround(range, className, forceRemove=false) {
+  surround(range, className, colorHex = null, forceRemove = false) {
     // console.log(className, typeof className, forceRemove);
     const refinedRange = range === undefined ? this.api.selection.getCurrentRange() : range;
     if (!refinedRange) {
@@ -211,7 +233,7 @@ class TextColor {
                 this.unwrap(termWrapper);
               } else {
                 //  reget range
-                this.wrap(this.api.selection.getCurrentRange(), selectedClass);
+                this.wrap(this.api.selection.getCurrentRange(), selectedClass, colorHex);
               }
             })
           return;
@@ -234,7 +256,7 @@ class TextColor {
    * @param {Range} range - selected fragment
    * @param {str  ing} selectedClass - class to wrap
    */
-  wrap(range, selectedClass) {
+  wrap(range, selectedClass, colorHex = null) {
     /**
      * Create a wrapper for highlighting
      */
@@ -248,6 +270,11 @@ class TextColor {
      *
      * // range.surroundContents(span);
      */
+
+    if (colorHex) {
+      coloredText.style.color = colorHex;
+    }
+
     coloredText.appendChild(range.extractContents());
     range.insertNode(coloredText);
 
