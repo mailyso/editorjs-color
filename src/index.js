@@ -102,7 +102,7 @@ class TextColor {
       e.stopImmediatePropagation();
 
       if (this.currentWrapper) {
-        this.unwrap(this.currentWrapper)
+        this.unwrap(this.currentRange, this.currentWrapper)
       }
     }
     this.actions.append(picker);
@@ -116,7 +116,7 @@ class TextColor {
         e.stopImmediatePropagation();
 
         if (this.currentWrapper) {
-          this.unwrap(this.currentWrapper)
+          this.unwrap(this.currentRange, this.currentWrapper)
         }
 
         this.wrap(this.currentRange, color);
@@ -147,30 +147,44 @@ class TextColor {
   }
 
   wrap(range, color) {
-    if (!range) {
+    if (!range || range.collapsed) { // range가 없거나 collapsed 상태라면 wrap 수행 안 함
+      console.warn("Invalid range for wrapping");
       return;
     }
+
+    console.log("Wrap range", range.toString())
     const selectedText = range.extractContents();
     const span = document.createElement(this.tag);
     span.classList.add(this.class);
     span.appendChild(selectedText);
     span.style.color = color;
-    span.innerHTML = span.textContent || '';
+    // span.innerHTML = span.textContent || '';
+    console.log("Wrap span", span)
     range.insertNode(span);
 
     this.api.selection.expandToTag(span);
   }
 
-  unwrap(termWrapper) {
-    const text = this.currentRange.extractContents();
+  unwrap(range, wrapper) {
+    console.log("unwrap wrapper", wrapper) // 가장 큰 동일 껍데기
+    console.log("unwrap range", range.toString())
+    const sel = window.getSelection();
 
-    termWrapper.remove();
+    // Wrapper의 내용물을 Range로 대체
+    const wrapperRange = document.createRange();
+    wrapperRange.selectNodeContents(wrapper);
+    const wrapperContent = wrapperRange.extractContents();
 
-    this.currentRange.insertNode(text);
+    // Wrapper를 DOM에서 제거
+    wrapper.parentNode.removeChild(wrapper);
 
-    let selectedText = window.getSelection();
-    selectedText.removeAllRanges();
-    selectedText.addRange(this.currentRange);
+    // Wrapper 내용을 DOM에 삽입
+    range.deleteContents();
+    range.insertNode(wrapperContent);
+
+    // Range를 복구
+    sel.removeAllRanges();
+    sel.addRange(range);
   }
 
   make(tagName, classNames = null, attributes = {}) {
