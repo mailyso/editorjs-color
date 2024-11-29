@@ -5,24 +5,17 @@ const {i18n} = require("./i18n/index");
 
 require('./index.css').toString();
 
-
 const CSS_OBJ = Object.freeze({
   colors: {
-    yellow: 'cdx-color__yellow',
-    blue: 'cdx-color__blue',
-    orange: 'cdx-color__orange',
-    red: 'cdx-color__red',
-    green: 'cdx-color__green',
-    brown: 'cdx-color__brown',
-    purple: 'cdx-color__purple',
-  },
-  hide: 'cdx-color-hide',
-  pallette: 'cdx-color-pallette',
-  button: 'cdx-color-button',
+    yellow: 'rgb(223, 171, 1)',
+    blue: 'rgb(11, 110, 153)',
+    orange: 'rgb(217, 115, 13)',
+    red: 'rgb(224, 62, 62)',
+    green: 'rgb(15, 123, 108)',
+    brown: 'rgb(100, 71, 58)',
+    purple: 'rgb(105, 64, 165)',
+  }
 });
-
-const CSS_ARR = Object.freeze(Object.keys(CSS_OBJ.colors).map(v => CSS_OBJ.colors[v]));
-
 
 /**
  * TextColor Tool for the Editor.js
@@ -30,359 +23,171 @@ const CSS_ARR = Object.freeze(Object.keys(CSS_OBJ.colors).map(v => CSS_OBJ.color
  * Allows to wrap inline fragment and style it somehow.
  */
 class TextColor {
-
-  // /**
-  //  * Class name for term-tag
-  //  *
-  //  * @type {object}
-  //  */
-  // static get CSS() {
-  //   return CSS_OBJ;
-  // };
-
-  /**
-   * @param {{api: object, data: object}}  - Editor.js API, data
-   */
-  constructor({api}) {
-    this.api = api;
-    if (typeof this.api.selection.getCurrentRange !== "function") {
-      alert("Upgrade editorjs to maily version");
-      console.error("Upgrade editorjs to maily version");
-    }
-
-    /**
-     * Toolbar Button
-     *
-     * @type {HTMLElement|null}
-     */
-    this.button = null;
-    this.pallette = {
-      palletteWrapper: null,
-      open: false
-    };
-
-    /**
-     * Tag represented the term
-     *
-     * @type {string}
-     */
-    this.tag = 'SPAN';
-
-    /**
-     * CSS classes
-     */
-    this.iconClasses = {
-      base: this.api.styles.inlineToolButton,
-      active: this.api.styles.inlineToolButtonActive
-    };
-    this.palletteHide = this.palletteHide.bind(this);
-    this.getPallette = this.getPallette.bind(this);
-  }
-  /**
-   * Specifies Tool as Inline Toolbar Tool
-   *
-   * @return {boolean}
-   */
   static get isInline() {
     return true;
   }
 
-  /**
-   * Create button element for Toolbar
-   *
-   * @return {HTMLElement}
-   */
-  render() {
-    this.button = document.createElement('button');
-    this.button.type = 'button';
-
-    //  so I think you can't call static methods on first render or sth
-    this.button.classList.add(this.iconClasses.base, CSS_OBJ.button);  //  really??>..
-    this.button.innerHTML = this.toolboxIcon;
-    try {
-      this.button.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        this.palletteHide(null);
-      })
-      this.pallette.palletteWrapper = make("div", [CSS_OBJ.hide, CSS_OBJ.pallette]);
-
-      //  add remove pallette
-      //  ===================================
-      const remover = this.getPallette("white", null, true);
-      this.pallette.palletteWrapper.appendChild(remover);
-      //  ===================================
-
-      Object.keys(CSS_OBJ.colors).forEach(key => {
-        const className = CSS_OBJ.colors[key];
-        const element = this.getPallette(key, className);
-        this.pallette.palletteWrapper.appendChild(element);
-      });
-
-      // 커스텀 컬러 피커
-      // const colorPicker = this.getCustomPicker()
-      // this.pallette.palletteWrapper.appendChild(colorPicker);
-      this.button.appendChild(this.pallette.palletteWrapper);
-    } catch(ex) {
-      console.log("<<<<<<<<<<<<<<<<<<<<<<<<exception while init pallette>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      console.warn(ex);
-    }
-
-    return this.button;
+  static get shortcut() {
+    return 'CMD+J';
   }
 
-  /**
-   *
-   * @param {string} name - name of color
-   * @param {string} backgroundClass - color className
-   * @returns {Element}
-   */
-  getPallette(name, backgroundClass, forceRemove = false) {
-    const element = make("div");
-    element.addEventListener("click", e => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.surround(undefined, backgroundClass, null, forceRemove);
-      this.palletteHide(true);
-    });
-    const colorElement = make("div", ["cdx-color-pallette-color"]);
-    const letterElement = make("div", [backgroundClass], {innerText: "가"});
-    colorElement.appendChild(letterElement);
-    const nameElement = make("div", ["cdx-color-pallette-name"], {innerText: i18n(name)});
-    element.append(colorElement, nameElement);
-    return element;
+  static get sanitize() {
+    return {
+      span: {
+        class: [
+            "cdx-color",
+          "cdx-color__yellow", "cdx-color__blue", "cdx-color__orange", "cdx-color__red", "cdx-color__green", "cdx-color__brown", "cdx-color__purple"
+        ],
+        style: {
+          color: true,
+        },
+      },
+    };
   }
 
-  // 작동 안함. 원인 찾아서 수정 필요.
-  // getCustomPicker() {
-  //   const element = make("div");
-  //   const colorPicker = make('input', ["cdx-color-picker"], {
-  //     type: "color",
-  //     value: "#000000"
-  //   })
-  //   colorPicker.addEventListener('blur', (e) => {
-  //     e.preventDefault();
-  //     e.stopPropagation();
-  //     this.surround(undefined, "cdx-color", e.target.value, false);
-  //     // this.palletteHide(true);
-  //   })
-  //
-  //   element.append(colorPicker);
-  //   return element
-  // }
-
-  /**
-   *
-   * @param {any} bool
-   */
-  palletteHide(bool) {
-    // console.log("palletteHide", bool);
-    if(bool === null) {
-      this.pallette.open = !this.pallette.open;
-      this.pallette.palletteWrapper.classList.toggle(CSS_OBJ.hide);
-      return;
-    }
-    if (bool) {
-      this.pallette.open = true;
-      this.pallette.palletteWrapper.classList.add(CSS_OBJ.hide);
-    } else {
-      this.pallette.open = false;
-      this.pallette.palletteWrapper.classList.remove(CSS_OBJ.hide);
-    }
-  }
-
-  /**
-   * Wrap/Unwrap selected fragment
-   *
-   * @param {Range} range - selected fragment
-   * @param {string} className - selected color
-   * @param {boolean} forceRemove - force it off or on
-   */
-  surround(range, className, colorHex = null, forceRemove = false) {
-    // console.log(className, typeof className, forceRemove);
-    const refinedRange = range === undefined ? this.api.selection.getCurrentRange() : range;
-    if (!refinedRange) {
-      return;
-    }
-    let selectedClass = className ? className : "cdx-color";
-
-    //  if forceRemove is true ignore class
-    if(forceRemove) {
-      let wrapper = this.api.selection.findParentTag(this.tag);
-      if(wrapper) {
-        // console.log(wrapper.className.split(" "));
-        selectedClass = wrapper.className.split(" ")?.[0];
-        let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
-
-        if (termWrapper) {
-          this.unwrap(termWrapper);
-        }
-      }
-      return;
-    } else {
-      let wrapper = this.api.selection.findParentTag(this.tag);
-      if(wrapper) {
-        const curClass = wrapper.className.split(" ")?.[0];
-        if(curClass) {
-          this.unwrap(this.api.selection.findParentTag(this.tag, curClass))
-            .then(() => {
-              let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
-
-              if (termWrapper) {
-                this.unwrap(termWrapper);
-              } else {
-                //  reget range
-                this.wrap(this.api.selection.getCurrentRange(), selectedClass, colorHex);
-              }
-            })
-          return;
-        }
-      }
-    }
-
-    let termWrapper = this.api.selection.findParentTag(this.tag, selectedClass);
-
-    if (termWrapper) {
-      this.unwrap(termWrapper);
-    } else {
-      this.wrap(refinedRange, selectedClass);
-    }
-  }
-
-  /**
-   * Wrap selection with term-tag
-   *
-   * @param {Range} range - selected fragment
-   * @param {str  ing} selectedClass - class to wrap
-   */
-  wrap(range, selectedClass, colorHex = null) {
-    /**
-     * Create a wrapper for highlighting
-     */
-    const coloredText = document.createElement(this.tag);
-
-    coloredText.classList.add(selectedClass);
-
-    /**
-     * SurroundContent throws an error if the Range splits a non-Text node with only one of its boundary points
-     * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Range/surroundContents}
-     *
-     * // range.surroundContents(span);
-     */
-
-    if (colorHex) {
-      coloredText.style.color = colorHex;
-    }
-
-    coloredText.appendChild(range.extractContents());
-    range.insertNode(coloredText);
-
-    /**
-     * Expand (add) selection to highlighted block
-     */
-    this.api.selection.expandToTag(coloredText);
-  }
-
-  /**
-   * Unwrap term-tag
-   *
-   * @param {HTMLElement} termWrapper - term wrapper tag
-   * @returns {Promise} promise
-   */
-  unwrap(termWrapper) {
-    return new Promise((res, rej) => {
-      /**
-       * Expand selection to all term-tag
-       */
-      this.api.selection.expandToTag(termWrapper);
-      let sel = window.getSelection();
-      let range = sel.getRangeAt(0);
-
-      let unwrappedContent = range.extractContents();
-
-      /**
-       * Remove empty term-tag
-       */
-      termWrapper.parentNode.removeChild(termWrapper);
-
-      /**
-       * Insert extracted content
-       */
-      range.insertNode(unwrappedContent);
-
-      /**
-       * Restore selection
-       */
-      sel.removeAllRanges();
-      sel.addRange(range);
-      res("done");
-    })
-  }
-
-  /**
-   * Check and change Term's state for current selection
-   */
-  checkState() {
-    let termTag
-    for(let className of CSS_ARR) {
-      termTag = this.api.selection.findParentTag(this.tag, className);
-      if(!!termTag) break;
-    }
-
-    this.button.classList.toggle(this.iconClasses.active, !!termTag);
-  }
-
-  clear() {
-    this.palletteHide(true);
-  }
-
-  /**
-   * Get Tool icon's SVG
-   * @return {string}
-   */
   get toolboxIcon() {
     return require('./../assets/icon.svg').default;
   }
 
-  get shortcut() {
-    return 'CMD+J';
+  get state() {
+    return this._state;
   }
 
-  /**
-   * Sanitizer rule
-   * @return {{span: {class: string[]}}}
-   */
-  static get sanitize() {
-    return {
-      span: {
-        class: CSS_ARR
+  set state(state) {
+    this._state = state;
+
+    this.button.classList.toggle(this.api.styles.inlineToolButtonActive, state);
+  }
+
+  constructor({api}) {
+    this.api = api;
+    this.button = null;
+    this._state = false;
+    this.actions = null;
+    this.currentRange = null;
+    this.currentWrapper = null;
+    this.tag = 'SPAN';
+    this.class = "cdx-color"
+  }
+
+  render() {
+    this.button = document.createElement('button');
+    this.button.type = 'button';
+    this.button.innerHTML = this.toolboxIcon;
+    this.button.classList.add(this.api.styles.inlineToolButton);
+
+    return this.button;
+  }
+
+  // when button is pressed Editor calls surround method of the tool with Range object as an argument:
+  surround(range) {
+    this.currentWrapper = this.api.selection.findParentTag(this.tag, this.class);
+    this.currentRange = range;
+  }
+
+  // 현재 플러그인 태그가 있는지 여부로, button 을 on/off 하기 위함
+  // When user selects some text Editor calls checkState method of each Inline Tool with current Selection to update the state if selected text contains some of the inline markup
+  checkState() {
+    const colorSpan = this.api.selection.findParentTag(this.tag, this.class);
+    this.state = !!colorSpan;
+  }
+
+  // 한번 그려두고 숨겨가면서 사용하는 픽커 영역
+  renderActions() {
+    this.actions = this.make("div", ["block", "w-full", "h-full", "flex-col"]);
+    const picker = this.buildColorPicker("white", null);
+    picker.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      if (this.currentWrapper) {
+        this.unwrap(this.currentWrapper)
       }
-    };
+    }
+    this.actions.append(picker);
+
+    Object.keys(CSS_OBJ.colors).forEach(key => {
+      const color = CSS_OBJ.colors[key];
+      const picker = this.buildColorPicker(key, color);
+      picker.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        if (this.currentWrapper) {
+          this.unwrap(this.currentWrapper)
+        }
+
+        this.wrap(this.currentRange, color);
+      }
+      this.actions.append(picker);
+    });
+
+    return this.actions;
+  }
+
+  clear() {
+    console.log("clear!");
+  }
+
+  buildColorPicker(name, color) {
+    const picker = this.make("div", ["flex", "cursor-pointer", "hover:bg-stone-200", "dark:bg-stone-800", "dark:hover:bg-stone-600", "space-x-2"])
+
+    const colorElement = this.make("div", ["w-8", "h-8", "flex", "items-center", "justify-center"]);
+    const letterElement =this. make("div", ["text-base"], {innerText: "가"});
+    if (color) {
+      letterElement.style.color = color;
+    }
+    colorElement.appendChild(letterElement);
+    const nameElement = this.make("div", ["text-base", "flex-1", "flex", "items-center", "justify-start"], {innerText: i18n(name)});
+    picker.append(colorElement, nameElement);
+
+    return picker
+  }
+
+  wrap(range, color) {
+    if (!range) {
+      return;
+    }
+    const selectedText = range.extractContents();
+    const span = document.createElement(this.tag);
+    span.classList.add(this.class);
+    span.appendChild(selectedText);
+    span.style.color = color;
+    span.innerHTML = span.textContent || '';
+    range.insertNode(span);
+
+    this.api.selection.expandToTag(span);
+  }
+
+  unwrap(termWrapper) {
+    const text = this.currentRange.extractContents();
+
+    termWrapper.remove();
+
+    this.currentRange.insertNode(text);
+
+    let selectedText = window.getSelection();
+    selectedText.removeAllRanges();
+    selectedText.addRange(this.currentRange);
+  }
+
+  make(tagName, classNames = null, attributes = {}) {
+    const el = document.createElement(tagName);
+
+    if (Array.isArray(classNames)) {
+      el.classList.add(...classNames);
+    } else if (classNames) {
+      el.classList.add(classNames);
+    }
+
+    for (const attrName in attributes) {
+      el[attrName] = attributes[attrName];
+    }
+
+    return el;
   }
 }
-/**
- * Helper for making Elements with attributes
- *
- * @param  {string} tagName           - new Element tag name
- * @param  {Array|string} classNames  - list or name of CSS class
- * @param  {object} attributes        - any attributes
- * @returns {Element}
- */
-function make(tagName, classNames = null, attributes = {}) {
-  const el = document.createElement(tagName);
-
-  if (Array.isArray(classNames)) {
-    el.classList.add(...classNames);
-  } else if (classNames) {
-    el.classList.add(classNames);
-  }
-
-  for (const attrName in attributes) {
-    el[attrName] = attributes[attrName];
-  }
-
-  return el;
-};
 
 module.exports = TextColor;
