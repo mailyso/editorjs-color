@@ -115,8 +115,8 @@ class TextColor {
         e.stopPropagation();
         e.stopImmediatePropagation();
 
-        if (this.currentWrapper) {
-          this.unwrap(this.currentRange, this.currentWrapper)
+        if (this.currentRange) {
+          this.unwrapAllWrappers(this.currentRange);
         }
 
         this.wrap(this.currentRange, color);
@@ -153,39 +153,70 @@ class TextColor {
     }
 
     console.log("Wrap range", range.toString())
+
     const selectedText = range.extractContents();
     const span = document.createElement(this.tag);
     span.classList.add(this.class);
-    span.appendChild(selectedText);
     span.style.color = color;
-    // span.innerHTML = span.textContent || '';
+    span.appendChild(selectedText);
     console.log("Wrap span", span)
     range.insertNode(span);
 
     this.api.selection.expandToTag(span);
   }
 
-  unwrap(range, wrapper) {
-    console.log("unwrap wrapper", wrapper) // 가장 큰 동일 껍데기
-    console.log("unwrap range", range.toString())
+  unwrapAllWrappers(range) {
     const sel = window.getSelection();
 
-    // Wrapper의 내용물을 Range로 대체
-    const wrapperRange = document.createRange();
-    wrapperRange.selectNodeContents(wrapper);
-    const wrapperContent = wrapperRange.extractContents();
+    // Range와 겹치는 모든 wrapper를 검색
+    const nodes = Array.from(range.extractContents().childNodes); // Range 내 모든 노드 복사
+    const fragment = document.createDocumentFragment(); // 최종 Fragment 생성
 
-    // Wrapper를 DOM에서 제거
-    wrapper.parentNode.removeChild(wrapper);
+    nodes.forEach(node => {
+      if (
+          node.nodeType === Node.ELEMENT_NODE && // Check if the node is an element
+          node.tagName === this.tag.toUpperCase() && // Check if it matches the specified tag
+          node.classList.contains(this.class) // Check if it has the specified class
+      ) {
+        // Handle the wrapper element
+        const wrapperRange = document.createRange();
+        wrapperRange.selectNodeContents(node);
+        const wrapperContent = wrapperRange.extractContents();
+        fragment.appendChild(wrapperContent); // Append the wrapper's contents to the fragment
 
-    // Wrapper 내용을 DOM에 삽입
-    range.deleteContents();
-    range.insertNode(wrapperContent);
+        // Remove the empty wrapper node
+        node.remove();
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // Handle non-wrapper element nodes
+        const nonWrapperRange = document.createRange();
+        nonWrapperRange.selectNodeContents(node);
+        const nonWrapperContent = nonWrapperRange.extractContents();
+        fragment.appendChild(nonWrapperContent); // Append the element's contents to the fragment
 
-    // Range를 복구
+        // Remove the non-wrapper node
+        node.remove();
+      } else {
+        // Handle text or other nodes
+        fragment.appendChild(node); // Append the node itself to the fragment
+      }
+    });
+
+    // Insert the final fragment at the range's start position
+    const container = range.startContainer;
+    range.deleteContents(); // Clear the current range contents
+    range.insertNode(fragment); // Insert the final fragment into the DOM
+
+    // Cleanup: Remove any empty elements in the container
+    if (container.nodeType === Node.ELEMENT_NODE) {
+      const emptyElements = Array.from(container.querySelectorAll('*')).filter(el => el.innerHTML.trim() === '');
+      emptyElements.forEach(el => el.remove());
+    }
+
+    // Selection을 유지
     sel.removeAllRanges();
     sel.addRange(range);
   }
+
 
   make(tagName, classNames = null, attributes = {}) {
     const el = document.createElement(tagName);
