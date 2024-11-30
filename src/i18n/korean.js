@@ -6,5 +6,6 @@ export const korean = Object.freeze({
   purple: "보라색",
   white: "기본색",
   yellow: "노란색",
-  orange: "주황색"
+  orange: "주황색",
+  preview_text: "가"
 });

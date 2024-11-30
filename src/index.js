@@ -35,7 +35,7 @@ class TextColor {
     return {
       span: {
         class: [
-            "cdx-color",
+          "cdx-color",
           "cdx-color__yellow", "cdx-color__blue", "cdx-color__orange", "cdx-color__red", "cdx-color__green", "cdx-color__brown", "cdx-color__purple"
         ],
         style: {
@@ -71,10 +71,10 @@ class TextColor {
   }
 
   render() {
-    this.button = document.createElement('button');
-    this.button.type = 'button';
-    this.button.innerHTML = this.toolboxIcon;
-    this.button.classList.add(this.api.styles.inlineToolButton);
+    this.button = this.make("button", [this.api.styles.inlineToolButton], {
+      type: "button",
+      innerHTML: this.toolboxIcon
+    })
 
     return this.button;
   }
@@ -96,13 +96,9 @@ class TextColor {
   renderActions() {
     this.actions = this.make("div", ["block", "w-full", "h-full", "flex-col"]);
     const picker = this.buildColorPicker("white", null);
-    picker.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-
+    picker.onclick = (_e) => {
       if (this.currentWrapper) {
-        this.unwrapAllWrappers(this.currentWrapper)
+        this.unwrap(this.currentWrapper)
       }
     }
     this.actions.append(picker);
@@ -110,15 +106,9 @@ class TextColor {
     Object.keys(CSS_OBJ.colors).forEach(key => {
       const color = CSS_OBJ.colors[key];
       const picker = this.buildColorPicker(key, color);
-      picker.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-
-        console.log("this.currentWrapper before unwrap", this.currentWrapper)
-        console.log("this.api.selection.findParentTag(this.tag, this.class);", this.api.selection.findParentTag(this.tag, this.class))
+      picker.onclick = (_e) => {
         if (this.currentWrapper) {
-          this.unwrapAllWrappers(this.currentWrapper);
+          this.unwrap(this.currentWrapper);
         }
 
         this.wrap(this.currentRange, color);
@@ -129,9 +119,9 @@ class TextColor {
     return this.actions;
   }
 
-  clear() {
-    console.log("clear!");
-  }
+  // clear() {
+  //
+  // }
 
   buildColorPicker(name, color) {
     const picker = this.make("div", ["flex", "cursor-pointer", "hover:bg-stone-200", "dark:bg-stone-800", "dark:hover:bg-stone-600", "space-x-2"])
@@ -150,84 +140,44 @@ class TextColor {
 
   wrap(range, color) {
     if (!range || range.collapsed) { // range가 없거나 collapsed 상태라면 wrap 수행 안 함
-      console.log("Invalid range for wrapping", range);
+      console.warn("Invalid range for wrapping", range);
       return;
     }
-
-    console.log("Wrap range", range.toString())
 
     const selectedText = range.extractContents();
     const span = document.createElement(this.tag);
     span.classList.add(this.class);
     span.style.color = color;
     span.appendChild(selectedText);
-    console.log("Wrap span", span)
     range.insertNode(span);
 
     this.api.selection.expandToTag(span);
   }
 
-  unwrapAllWrappers(termWrapper) {
-    this.api.selection.expandToTag(termWrapper);
-    let sel = window.getSelection();
-    this.currentRange = sel.getRangeAt(0);
+  unwrap(termWrapper) {
+    this.api.selection.expandToTag(termWrapper)
 
-    // Range와 겹치는 모든 wrapper를 검색
-    const nodes = Array.from(this.currentRange.extractContents().childNodes); // Range 내 모든 노드 복사
-    const fragment = document.createDocumentFragment(); // 최종 Fragment 생성
-    console.log("Found nodes in range:", nodes);
+    const sel = window.getSelection()
+    this.currentRange = sel.getRangeAt(0)
 
-    nodes.forEach(node => {
-      if (
-          node.nodeType === Node.ELEMENT_NODE && // Check if the node is an element
-          node.tagName === this.tag.toUpperCase() && // Check if it matches the specified tag
-          node.classList.contains(this.class) // Check if it has the specified class
-      ) {
-        // Handle the wrapper element
-        const wrapperRange = document.createRange();
-        wrapperRange.selectNodeContents(node);
-        const wrapperContent = wrapperRange.extractContents();
-        fragment.appendChild(wrapperContent); // Append the wrapper's contents to the fragment
-        node.remove();
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        console.log("non-wrapper nodes", node)
-        // Handle non-wrapper element nodes
-        const nonWrapperRange = document.createRange();
-        nonWrapperRange.selectNodeContents(node);
-        const nonWrapperContent = nonWrapperRange.extractContents();
-        fragment.appendChild(nonWrapperContent); // Append the element's contents to the fragment
-
-        // Remove the non-wrapper node
-        node.remove();
-      } else {
-        // Handle text or other nodes
-        fragment.appendChild(node); // Append the node itself to the fragment
-      }
-    });
+    const unwrappedContent = this.currentRange.extractContents()
 
     /**
      * Remove empty term-tag
      */
-    termWrapper.parentNode.removeChild(termWrapper);
+    termWrapper.parentNode.removeChild(termWrapper)
 
-    // Insert the final fragment at the range's start position
-    const container = this.currentRange.startContainer;
-    console.log("container", container)
-    this.currentRange.deleteContents(); // Clear the current range contents
-    this.currentRange.insertNode(fragment); // Insert the final fragment into the DOM
+    /**
+     * Insert extracted content
+     */
+    this.currentRange.insertNode(unwrappedContent)
 
-    // Cleanup: Remove any empty elements in the container
-    if (container.nodeType === Node.ELEMENT_NODE) {
-      const emptyElements = Array.from(container.querySelectorAll('*')).filter(el => el.innerHTML.trim() === '');
-      console.log("emptyElements", emptyElements)
-      emptyElements.forEach(el => el.remove());
-    }
-
-    // Selection을 유지
-    sel.removeAllRanges();
-    sel.addRange(this.currentRange);
+    /**
+     * Restore selection
+     */
+    sel.removeAllRanges()
+    sel.addRange(this.currentRange)
   }
-
 
   make(tagName, classNames = null, attributes = {}) {
     const el = document.createElement(tagName);
