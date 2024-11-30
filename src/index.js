@@ -2,9 +2,6 @@
  * Build styles
  */
 const {i18n} = require("./i18n/index");
-
-require('./index.css').toString();
-
 const CSS_OBJ = Object.freeze({
   colors: {
     yellow: 'rgb(223, 171, 1)',
@@ -142,7 +139,7 @@ class TextColor {
 
     const letterElement = this.make(
         "div",
-        "text-base",
+        "text-base px-1 border border-stone-200 dark:border-stone-600 rounded",
         { innerText: i18n("preview_text") }
     );
 
