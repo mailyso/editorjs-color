@@ -29,14 +29,17 @@ import TextColor from "editorjs-color";
 
 Add a new Tool to the `tools` property of the Editor.js initial config.
 
-```javascript
+```text
 var editor = EditorJS({
   ...
   
   tools: {
     ...
     TextColor: {
-      class: TextColor,
+      class: TextColor, 
+      config: {
+        tag: "SPAN"
+      }
     }
   },
   
@@ -56,7 +59,7 @@ Colored text will be wrapped with a `span` tag with an `cdx-color` class.
 {
     "type" : "text",
     "data" : {
-        "text" : "Create a directory for your module, enter it and run <span class=\"cdx-color__yellow\">npm init</span> command."
+        "text" : "Create a directory for your module, enter it and run <span class=\"cdx-color\">npm init</span> command."
     }
 }
 ```

@@ -36,12 +36,12 @@ class TextColor {
       span: {
         class: [
           "cdx-color",
-          "cdx-color__yellow", "cdx-color__blue", "cdx-color__orange", "cdx-color__red", "cdx-color__green", "cdx-color__brown", "cdx-color__purple"
+          "cdx-color__yellow", "cdx-color__blue", "cdx-color__orange", "cdx-color__red", "cdx-color__green", "cdx-color__brown", "cdx-color__purple" // support legacy
         ],
         style: {
-          color: true,
-        },
-      },
+          color: true
+        }
+      }
     };
   }
 
@@ -59,22 +59,28 @@ class TextColor {
     this.button.classList.toggle(this.api.styles.inlineToolButtonActive, state);
   }
 
-  constructor({api}) {
+  constructor({api, config}) {
     this.api = api;
+    this.config = config;
+
     this.button = null;
     this._state = false;
     this.actions = null;
     this.currentRange = null;
     this.currentWrapper = null;
-    this.tag = 'SPAN';
+    this.tag = this.config.tag || 'SPAN';
     this.class = "cdx-color"
   }
 
   render() {
-    this.button = this.make("button", [this.api.styles.inlineToolButton], {
-      type: "button",
-      innerHTML: this.toolboxIcon
-    })
+    this.button = this.make(
+        "button",
+        [this.api.styles.inlineToolButton],
+        {
+          type: "button",
+          innerHTML: this.toolboxIcon
+        }
+    )
 
     return this.button;
   }
@@ -85,27 +91,30 @@ class TextColor {
     this.currentRange = range;
   }
 
-  // 현재 플러그인 태그가 있는지 여부로, button 을 on/off 하기 위함
   // When user selects some text Editor calls checkState method of each Inline Tool with current Selection to update the state if selected text contains some of the inline markup
   checkState() {
     const colorSpan = this.api.selection.findParentTag(this.tag, this.class);
     this.state = !!colorSpan;
   }
 
-  // 한번 그려두고 숨겨가면서 사용하는 픽커 영역
   renderActions() {
-    this.actions = this.make("div", ["block", "w-full", "h-full", "flex-col"]);
+    this.actions = this.make(
+        "div",
+        "block w-full h-full flex-col"
+    );
     const picker = this.buildColorPicker("white", null);
     picker.onclick = (_e) => {
       if (this.currentWrapper) {
         this.unwrap(this.currentWrapper)
       }
     }
+
     this.actions.append(picker);
 
     Object.keys(CSS_OBJ.colors).forEach(key => {
       const color = CSS_OBJ.colors[key];
       const picker = this.buildColorPicker(key, color);
+
       picker.onclick = (_e) => {
         if (this.currentWrapper) {
           this.unwrap(this.currentWrapper);
@@ -113,41 +122,58 @@ class TextColor {
 
         this.wrap(this.currentRange, color);
       }
+
       this.actions.append(picker);
     });
 
     return this.actions;
   }
 
-  // clear() {
-  //
-  // }
-
   buildColorPicker(name, color) {
-    const picker = this.make("div", ["flex", "cursor-pointer", "hover:bg-stone-200", "dark:bg-stone-800", "dark:hover:bg-stone-600", "space-x-2"])
+    const picker = this.make(
+        "div",
+        "flex cursor-pointer hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-600 space-x-2"
+    );
 
-    const colorElement = this.make("div", ["w-8", "h-8", "flex", "items-center", "justify-center"]);
-    const letterElement =this. make("div", ["text-base"], {innerText: "가"});
+    const colorElement = this.make(
+        "div",
+        "w-8 h-8 flex items-center justify-center"
+    );
+
+    const letterElement = this.make(
+        "div",
+        "text-base",
+        { innerText: i18n("preview_text") }
+    );
+
     if (color) {
       letterElement.style.color = color;
     }
+
     colorElement.appendChild(letterElement);
-    const nameElement = this.make("div", ["text-base", "flex-1", "flex", "items-center", "justify-start"], {innerText: i18n(name)});
+
+    const nameElement = this.make(
+        "div",
+        "text-base flex-1 flex items-center justify-start",
+        { innerText: i18n(name) }
+    );
+
     picker.append(colorElement, nameElement);
 
-    return picker
+    return picker;
   }
 
+
   wrap(range, color) {
-    if (!range || range.collapsed) { // range가 없거나 collapsed 상태라면 wrap 수행 안 함
+    if (!range || range.collapsed) {
       console.warn("Invalid range for wrapping", range);
       return;
     }
 
     const selectedText = range.extractContents();
-    const span = document.createElement(this.tag);
-    span.classList.add(this.class);
+    const span = this.make(this.tag, [this.class])
     span.style.color = color;
+
     span.appendChild(selectedText);
     range.insertNode(span);
 
@@ -162,30 +188,24 @@ class TextColor {
 
     const unwrappedContent = this.currentRange.extractContents()
 
-    /**
-     * Remove empty term-tag
-     */
     termWrapper.parentNode.removeChild(termWrapper)
-
-    /**
-     * Insert extracted content
-     */
     this.currentRange.insertNode(unwrappedContent)
 
-    /**
-     * Restore selection
-     */
     sel.removeAllRanges()
     sel.addRange(this.currentRange)
   }
 
+  // clear() {
+  //
+  // }
+
   make(tagName, classNames = null, attributes = {}) {
     const el = document.createElement(tagName);
 
-    if (Array.isArray(classNames)) {
+    if (typeof classNames === "string") {
+      el.classList.add(...classNames.split(/\s+/).filter(Boolean));
+    } else if (Array.isArray(classNames)) {
       el.classList.add(...classNames);
-    } else if (classNames) {
-      el.classList.add(classNames);
     }
 
     for (const attrName in attributes) {
