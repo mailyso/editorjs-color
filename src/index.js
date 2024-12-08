@@ -1,7 +1,9 @@
 /**
  * Build styles
  */
-const {i18n} = require("./i18n/index");
+import { i18n } from "./i18n/index";
+import toolboxIcon from './../assets/icon.svg';
+
 const CSS_OBJ = Object.freeze({
   colors: {
     yellow: 'rgb(223, 171, 1)',
@@ -14,12 +16,23 @@ const CSS_OBJ = Object.freeze({
   }
 });
 
+const ALLOWED_CLASSES = [
+  "cdx-color",
+  "cdx-color__yellow",
+  "cdx-color__blue",
+  "cdx-color__orange",
+  "cdx-color__red",
+  "cdx-color__green",
+  "cdx-color__brown",
+  "cdx-color__purple",
+];
+
 /**
  * TextColor Tool for the Editor.js
  *
  * Allows to wrap inline fragment and style it somehow.
  */
-class TextColor {
+export default class TextColor {
   static get isInline() {
     return true;
   }
@@ -30,20 +43,32 @@ class TextColor {
 
   static get sanitize() {
     return {
-      span: {
-        class: [
-          "cdx-color",
-          "cdx-color__yellow", "cdx-color__blue", "cdx-color__orange", "cdx-color__red", "cdx-color__green", "cdx-color__brown", "cdx-color__purple" // support legacy
-        ],
-        style: {
-          color: true
+      span: (el) => {
+        // 허용된 클래스만 유지
+        const classes = el.classList;
+        const filteredClasses = Array.from(classes).filter((cls) =>
+            ALLOWED_CLASSES.includes(cls)
+        );
+
+        if (filteredClasses.length > 0) {
+          return {
+            style: {
+              color: true, // style 중 color만 허용
+            },
+            class: true, // 클래스 유지
+          };
         }
-      }
+
+        // 허용되지 않은 클래스일 경우 style 제거
+        return {
+          class: false, // 클래스 제거
+        };
+      },
     };
   }
 
   get toolboxIcon() {
-    return require('./../assets/icon.svg').default;
+    return toolboxIcon;
   }
 
   get state() {
@@ -212,5 +237,3 @@ class TextColor {
     return el;
   }
 }
-
-module.exports = TextColor;
